@@ -193,6 +193,9 @@ task :update do
       grit_repo.tags.map(&:name).select {|t| t =~ /^release-/}
     end
 
+    puts "Releases:"
+    p release_tags
+
     release_tags.select! {|t| !File.exist?(File.expand_path("./#{project_name}-#{t.gsub(/^release-/, '')}.gem", gem_store_path))}
 
     gl("Found #{release_tags.size} releases that are not yet in the gem store.")
