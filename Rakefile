@@ -162,6 +162,8 @@ task :update do
     end]
   end
 
+  updates = []
+
   gl("Retrieving updates")
   repos.each do |repo|
     name = repo['full_name']
@@ -193,9 +195,6 @@ task :update do
       grit_repo.tags.map(&:name).select {|t| t =~ /^release-/}
     end
 
-    puts "Releases:"
-    p release_tags
-
     release_tags.select! {|t| !File.exist?(File.expand_path("./#{project_name}-#{t.gsub(/^release-/, '')}.gem", gem_store_path))}
 
     gl("Found #{release_tags.size} releases that are not yet in the gem store.")
@@ -210,6 +209,8 @@ task :update do
         nice_sys(['gem', 'build', "#{project_name}.gemspec"])
         FileUtils.copy(File.expand_path("./#{project_name}-#{version}.gem", existing_repo), gem_store_path)
 
+        updates << "#{project_name}-#{version}"
+
         Dir.chdir root
       end
     end
@@ -221,4 +222,12 @@ task :update do
       raise "Could not reindex the gems" unless response.status == 302
     end
   end
+
+  if updates.size > 0
+    puts "Added:"
+    puts updates.map {|e| "  - #{e}"}.join "\n"
+  else
+    puts "No gems updated."
+  end
+
 end
