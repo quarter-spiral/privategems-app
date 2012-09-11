@@ -124,6 +124,7 @@ task :update do
   require "net/https"
   require "fileutils"
   require "grit"
+  require "rack/client"
 
   user = ask("Github User: ")
   pass = ask("Github password:  " ) { |q| q.echo = "x"}
@@ -132,7 +133,7 @@ task :update do
 
   root = File.dirname(__FILE__)
   git_cache_path = File.expand_path('./tmp/gitcache', root)
-  gem_store_path = File.expand_path('./vendor/gems', root)
+  gem_store_path = File.expand_path('./vendor/gems/gems', root)
 
   token = gl("Authenticating with GitHub") do
     token = github_post('/authorizations', basic_auth: {user: user, pass: pass}, body: {scopes: ['repo']})['token']
@@ -208,6 +209,13 @@ task :update do
 
         Dir.chdir root
       end
+    end
+
+    gl("Reindexing the gems") do
+      Geminabox.data = File.expand_path('./vendor/gems', File.dirname(__FILE__))
+      client = Rack::Client.new { run Geminabox }
+      response = client.get('/reindex')
+      raise "Could not reindex the gems" unless response.status == 302
     end
   end
 end
