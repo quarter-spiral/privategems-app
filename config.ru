@@ -2,7 +2,7 @@ $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), "lib")))
 
 require "rubygems"
 require "geminabox"
-Geminabox.data = File.expand_path('data', File.dirname(__FILE__))
+Geminabox.data = File.expand_path('./vendor/gems', File.dirname(__FILE__))
 
 qs_gems_password = ENV['QS_GEMS_PASSWORD'].freeze
 
