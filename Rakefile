@@ -165,7 +165,10 @@ task :update do
   updates = []
 
   gl("Retrieving updates")
+  skip_rest = false
   repos.each do |repo|
+    next if skip_rest
+
     name = repo['full_name']
     project_name = File.basename(name)
     existing_repo = gl("Check if #{project_name} is already checked out") do
@@ -221,6 +224,8 @@ task :update do
       response = client.get('/reindex')
       raise "Could not reindex the gems" unless response.status == 302
     end
+
+    skip_rest = true if !release_tags.empty? && ENV['FAST'] == '1'
   end
 
   if updates.size > 0
