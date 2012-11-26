@@ -126,17 +126,25 @@ task :update do
   require "grit"
   require "rack/client"
 
-  user = ask("Github User: ")
-  pass = ask("Github password:  " ) { |q| q.echo = "x"}
-
   organization = 'quarter-spiral'
 
   root = File.dirname(__FILE__)
   git_cache_path = File.expand_path('./tmp/gitcache', root)
   gem_store_path = File.expand_path('./vendor/gems/gems', root)
 
-  token = gl("Authenticating with GitHub") do
-    token = github_post('/authorizations', basic_auth: {user: user, pass: pass}, body: {scopes: ['repo']})['token']
+
+  GITHUB_TOKEN_FILE = '.githubtoken'
+  token = File.exist?(GITHUB_TOKEN_FILE) ? File.read(GITHUB_TOKEN_FILE) : nil
+
+  unless token
+    user = ask("Github User: ")
+    pass = ask("Github password:  " ) { |q| q.echo = "x"}
+
+    token = gl("Authenticating with GitHub") do
+      token = github_post('/authorizations', basic_auth: {user: user, pass: pass}, body: {scopes: ['repo']})['token']
+    end
+
+    File.open('.githubtoken', 'w') {|f| f.write token}
   end
 
   repos = gl("Retrieving repositories of #{organization}") do
@@ -166,10 +174,16 @@ task :update do
 
   gl("Retrieving updates")
   skip_rest = false
+
+  only_repo = ENV['ONLY']
+
   repos.each do |repo|
     next if skip_rest
 
     name = repo['full_name']
+
+    next if only_repo && "#{organization}/#{only_repo}" != name
+
     project_name = File.basename(name)
     existing_repo = gl("Check if #{project_name} is already checked out") do
       (existing_repos.detect {|path, er| er.include?(repo['ssh_url'])} || []).first
