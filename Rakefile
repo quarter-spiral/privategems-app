@@ -148,7 +148,10 @@ task :update do
   end
 
   repos = gl("Retrieving repositories of #{organization}") do
-    github_get("/orgs/#{organization}/repos", oauth: token)
+    r1 = github_get("/orgs/#{organization}/repos", oauth: token)
+    r2 = github_get("/orgs/#{organization}/repos?page=2", oauth: token)
+    r3 = github_get("/orgs/#{organization}/repos?page=3", oauth: token)
+    r1 + r2 + r3
   end
 
   gl("Found #{repos.size} repositories.")
