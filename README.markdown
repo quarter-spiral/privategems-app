@@ -1,3 +1,8 @@
+Copyright (c) 2013 Quarter Spiral Inc.
+
+All rights reserved.
+
+
 # Gem in a Box – Really simple rubygem hosting
 ##
 
@@ -51,9 +56,6 @@ Change the host to upload to:
 
 Simples!
 
-## Licence
-
-Fork it, mod it, choose it, use it, make it better. All under the [do what the fuck you want to + beer/pizza public license][WTFBPPL].
 
 [WTFBPPL]: http://tomlea.co.uk/WTFBPPL.txt
 [sinatra]: http://www.sinatrarb.com/
